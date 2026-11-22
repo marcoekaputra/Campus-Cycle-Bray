@@ -130,4 +130,38 @@ class AuthTest extends TestCase
             ->assertSee('Ahmad Dahlan')
             ->assertSee('3337220009');
     }
+
+    public function test_register_and_login_with_nim_ending_in_29_post_route(): void
+    {
+        $response = $this->post('/register', [
+            'nim' => '3337240029',
+            'name' => 'Teman Informatika 29',
+            'email' => 'teman29@gmail.com',
+            'password' => 'untirta2024',
+            'password_confirmation' => 'untirta2024',
+        ]);
+
+        $response->assertRedirect('/dashboard');
+
+        $this->assertDatabaseHas('users', [
+            'nim' => '3337240029',
+            'email' => 'teman29@gmail.com',
+            'name' => 'Teman Informatika 29',
+            'campus_zone' => 'Cilegon',
+        ]);
+
+        $this->assertAuthenticated();
+
+        // Logout then test login with NIM
+        auth()->logout();
+        $this->assertGuest();
+
+        $loginResponse = $this->post('/login', [
+            'login' => '3337240029',
+            'password' => 'untirta2024',
+        ]);
+
+        $loginResponse->assertRedirect('/dashboard');
+        $this->assertAuthenticated();
+    }
 }

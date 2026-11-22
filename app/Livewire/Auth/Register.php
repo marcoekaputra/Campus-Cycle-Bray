@@ -150,8 +150,11 @@ class Register extends Component
                 'name' => trim($this->name),
                 'email' => $cleanEmail,
                 'password' => Hash::make($this->password),
+                'role' => 'student',
             ]);
         }
+
+        $user->wallet()->firstOrCreate([], ['balance' => 0]);
 
         // 4. Login otomatis
         Auth::login($user);

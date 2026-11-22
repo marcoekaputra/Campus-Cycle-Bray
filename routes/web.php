@@ -37,6 +37,69 @@ Route::get('/product/{slug}', ProductDetail::class)->name('product.detail');
 // 4. Guest Routes (Login & Register & Password Reset)
 Route::middleware('guest')->group(function () {
     Route::get('/register', Register::class)->name('register');
+    Route::post('/register', function (Request $request, \App\Services\PddiktiService $pddiktiService) {
+        $validated = $request->validate([
+            'nim' => ['required', 'string', 'min:6', 'max:30'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ], [
+            'nim.required' => 'NIM wajib diisi.',
+            'nim.min' => 'NIM minimal 6 karakter.',
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'email.required' => 'Alamat email pribadi wajib diisi.',
+            'email.email' => 'Format email pribadi tidak valid.',
+            'password.required' => 'Kata sandi wajib diisi.',
+            'password.min' => 'Kata sandi minimal 6 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+        ]);
+
+        $cleanNim = trim($validated['nim']);
+        $cleanEmail = strtolower(trim($validated['email']));
+        $cleanName = trim($validated['name']);
+
+        $existingEmailUser = \App\Models\User::where('email', $cleanEmail)->where('nim', '!=', $cleanNim)->first();
+        if ($existingEmailUser) {
+            return back()->withErrors(['email' => 'Email ini sudah dipakai oleh akun lain. Silakan gunakan email pribadi lain.'])->withInput();
+        }
+
+        $prefix = substr($cleanNim, 0, 3);
+        $campusZone = match ($prefix) {
+            '333', '331', '332', '334', '335', '336', '337' => 'Cilegon',
+            '111', '112', '228', '777', '771', '772', '773' => 'Ciwaru',
+            default => 'Sindangsari',
+        };
+
+        $user = \App\Models\User::where('nim', $cleanNim)->first();
+        if ($user) {
+            $user->update([
+                'name' => $cleanName,
+                'email' => $cleanEmail,
+                'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+                'campus_zone' => $campusZone,
+                'campus_name' => 'Universitas Sultan Ageng Tirtayasa',
+            ]);
+        } else {
+            $user = \App\Models\User::create([
+                'nim' => $cleanNim,
+                'name' => $cleanName,
+                'email' => $cleanEmail,
+                'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+                'campus_name' => 'Universitas Sultan Ageng Tirtayasa',
+                'campus_zone' => $campusZone,
+                'role' => 'student',
+            ]);
+        }
+
+        $user->wallet()->firstOrCreate([], ['balance' => 0]);
+
+        Auth::login($user);
+        $request->session()->regenerate();
+        $request->session()->flash('status', 'Selamat datang di CampusCycle Untirta, ' . $user->name . '! Akun Anda berhasil diaktifkan.');
+
+        return redirect()->intended('/dashboard');
+    })->name('register.post');
+
     Route::get('/login', Login::class)->name('login');
     Route::get('/forgot-password', \App\Livewire\Auth\ForgotPassword::class)->name('password.request');
     Route::get('/reset-password/{token}', \App\Livewire\Auth\ResetPassword::class)->name('password.reset');

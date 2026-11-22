@@ -1,10 +1,10 @@
 <div class="sm:mx-auto sm:w-full sm:max-w-lg">
     <!-- Card Container -->
-    <div class="bg-white py-8 px-6 shadow-2xl shadow-rose-950/10 sm:rounded-3xl sm:px-10 border border-slate-200/80">
+    <div class="bg-white py-6 px-4 sm:py-8 sm:px-10 shadow-2xl shadow-rose-950/10 rounded-2xl sm:rounded-3xl border border-slate-200/80">
         <!-- Header -->
-        <div class="mb-6 text-center">
-            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-rose-50 text-[#641E28] mb-3 border border-rose-100 shadow-inner">
-                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="mb-5 sm:mb-6 text-center">
+            <div class="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-rose-50 text-[#641E28] mb-2 sm:mb-3 border border-rose-100 shadow-inner">
+                <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                 </svg>
             </div>
@@ -12,9 +12,9 @@
                 <svg class="w-3.5 h-3.5 text-[#EDAB0F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                 </svg>
-                <span>FT UNTIRTA & Multi-Fakultas</span>
+                <span>Civitas Akademika Untirta</span>
             </div>
-            <h2 class="text-2xl font-black tracking-tight text-slate-900">
+            <h2 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">
                 Registrasi Mahasiswa Untirta
             </h2>
             <p class="mt-1 text-xs text-slate-500">
@@ -22,14 +22,35 @@
             </p>
         </div>
 
-        <form wire:submit.prevent="register" class="space-y-4">
+        @if (session('status'))
+            <div class="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800 flex items-center gap-2">
+                <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <span>{{ session('status') }}</span>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-800">
+                <p class="font-bold mb-1">Periksa isian form:</p>
+                <ul class="list-disc list-inside space-y-0.5">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form wire:submit="register" method="POST" action="{{ route('register.post') }}" class="space-y-4">
+            @csrf
             <!-- 1. Input NIM with Realtime Validation -->
             <div>
                 <div class="flex items-center justify-between mb-1.5">
                     <label for="nim" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
                         NIM Mahasiswa <span class="text-rose-500">*</span>
                     </label>
-                    <span class="text-[11px] text-[#641E28] font-bold">Validasi Otomatis PDDIKTI</span>
+                    <span class="text-[11px] text-[#641E28] font-bold">Validasi Otomatis Civitas</span>
                 </div>
                 <div class="relative rounded-xl shadow-sm">
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -40,9 +61,11 @@
 
                     <input
                         type="text"
+                        name="nim"
                         id="nim"
                         wire:model.live.debounce.500ms="nim"
-                        placeholder="Contoh: 3337220001 (FT) / 222... (FEB)"
+                        value="{{ old('nim', $nim) }}"
+                        placeholder="Contoh: 3337240029 (FT) / 222... (FEB)"
                         class="block w-full pl-11 pr-11 py-2.5 text-sm rounded-xl font-mono border {{ $isNimValid === true ? 'border-[#641E28] focus:ring-[#641E28] focus:border-[#641E28] bg-rose-50/30' : ($isNimValid === false ? 'border-rose-500 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/20' : 'border-slate-300 focus:ring-[#641E28] focus:border-[#641E28]') }} transition-colors"
                         required
                     />
@@ -132,8 +155,10 @@
                     </div>
                     <input
                         type="text"
+                        name="name"
                         id="name"
                         wire:model="name"
+                        value="{{ old('name', $name) }}"
                         placeholder="Nama sesuai data akademik"
                         class="block w-full pl-11 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-[#641E28] focus:border-[#641E28] transition-colors font-medium"
                         required
@@ -157,8 +182,10 @@
                     </div>
                     <input
                         type="email"
+                        name="email"
                         id="email"
                         wire:model="email"
+                        value="{{ old('email', $email) }}"
                         placeholder="namaanda@gmail.com"
                         class="block w-full pl-11 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-[#641E28] focus:border-[#641E28] transition-colors"
                         required
@@ -184,6 +211,7 @@
                         </div>
                         <input
                             type="password"
+                            name="password"
                             id="password"
                             wire:model="password"
                             placeholder="Min. 6 karakter"
@@ -222,6 +250,7 @@
                         </div>
                         <input
                             type="password"
+                            name="password_confirmation"
                             id="password_confirmation"
                             wire:model="password_confirmation"
                             placeholder="Ketik ulang kata sandi"

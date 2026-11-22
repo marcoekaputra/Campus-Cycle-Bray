@@ -1,21 +1,21 @@
 <div class="sm:mx-auto sm:w-full sm:max-w-md" x-data="{ showPass: false }">
     <!-- Card Container -->
-    <div class="bg-white py-8 px-6 shadow-2xl shadow-rose-950/10 sm:rounded-3xl sm:px-10 border border-slate-200/80">
+    <div class="bg-white py-6 px-4 sm:py-8 sm:px-10 shadow-2xl shadow-rose-950/10 rounded-2xl sm:rounded-3xl border border-slate-200/80">
         <!-- Header -->
-        <div class="mb-6 text-center">
-            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-rose-50 text-[#641E28] mb-3 border border-rose-100 shadow-inner">
+        <div class="mb-5 sm:mb-6 text-center">
+            <div class="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-rose-50 text-[#641E28] mb-2 sm:mb-3 border border-rose-100 shadow-inner">
                 <!-- Login Key Icon -->
-                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                 </svg>
             </div>
-            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-rose-50 text-[#641E28] border border-rose-200/80 mb-3">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-rose-50 text-[#641E28] border border-rose-200/80 mb-2 sm:mb-3">
                 <svg class="w-3.5 h-3.5 text-[#641E28]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
                 <span>Civitas Akademika Untirta</span>
             </div>
-            <h2 class="text-2xl font-black tracking-tight text-slate-900">
+            <h2 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">
                 Masuk ke CampusCycle
             </h2>
             <p class="mt-1 text-xs text-slate-500">
