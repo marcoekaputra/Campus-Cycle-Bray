@@ -279,5 +279,27 @@
     </footer>
 
     @livewireScripts
+
+    <!-- Global Helper: Toggle Password Visibility (100% Reliable Cross-Browser) -->
+    <script>
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const isPass = input.type === 'password';
+            input.type = isPass ? 'text' : 'password';
+            
+            const eyeOpen = btn.querySelector('.eye-open');
+            const eyeClosed = btn.querySelector('.eye-closed');
+            if (eyeOpen && eyeClosed) {
+                if (isPass) {
+                    eyeOpen.classList.add('hidden');
+                    eyeClosed.classList.remove('hidden');
+                } else {
+                    eyeOpen.classList.remove('hidden');
+                    eyeClosed.classList.add('hidden');
+                }
+            }
+        }
+    </script>
 </body>
 </html>

@@ -51,12 +51,20 @@ Route::middleware('guest')->group(function () {
 
         $cleanLogin = trim($request->input('login'));
         $isEmail = filter_var($cleanLogin, FILTER_VALIDATE_EMAIL);
-        $credentials = [
-            $isEmail ? 'email' : 'nim' => $cleanLogin,
-            'password' => $request->input('password'),
-        ];
+        $loginField = $isEmail ? 'email' : 'nim';
+        $loginValue = $isEmail ? strtolower($cleanLogin) : $cleanLogin;
+        $password = $request->input('password');
+        $remember = $request->boolean('remember');
 
-        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
+        $attempt = Auth::attempt([$loginField => $loginValue, 'password' => $password], $remember);
+        if (!$attempt) {
+            $attempt = Auth::attempt(['email' => strtolower($cleanLogin), 'password' => $password], $remember);
+        }
+        if (!$attempt) {
+            $attempt = Auth::attempt(['nim' => $cleanLogin, 'password' => $password], $remember);
+        }
+
+        if (!$attempt) {
             return back()->withErrors([
                 'login' => 'Kombinasi akun (NIM/Email dan Kata Sandi) tidak sesuai.',
             ])->withInput($request->only('login'));

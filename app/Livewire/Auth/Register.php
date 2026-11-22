@@ -39,7 +39,7 @@ class Register extends Component
             return;
         }
 
-        if (strlen($value) === 10) {
+        if (strlen($value) >= 8 && strlen($value) <= 14) {
             $this->isValidatingNim = true;
             $result = $pddiktiService->validateNim($value);
 
@@ -52,14 +52,14 @@ class Register extends Component
             }
 
             $this->isValidatingNim = false;
-        } elseif (strlen($value) < 10) {
+        } elseif (strlen($value) < 8) {
             $this->isNimValid = null;
             $this->nimMessage = 'Ketik ' . (10 - strlen($value)) . ' digit lagi untuk verifikasi format NIM Untirta.';
             $this->nimSource = 'format_hint';
             $this->isValidatingNim = false;
         } else {
             $this->isNimValid = false;
-            $this->nimMessage = 'Format NIM resmi Untirta terdiri dari tepat 10 digit.';
+            $this->nimMessage = 'Format NIM resmi Untirta terdiri dari 10 digit angka.';
             $this->nimSource = 'format_error';
             $this->isValidatingNim = false;
         }
@@ -80,10 +80,10 @@ class Register extends Component
     {
         // 1. Validasi form
         $this->validate([
-            'nim' => ['required', 'string', 'max:30', 'unique:users,nim'],
+            'nim' => ['required', 'string', 'min:8', 'max:30', 'unique:users,nim'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', Password::defaults(), 'confirmed'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
         ], [
             'nim.required' => 'NIM wajib diisi.',
             'nim.unique' => 'NIM ini sudah pernah didaftarkan di CampusCycle.',
@@ -92,6 +92,7 @@ class Register extends Component
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email ini sudah terdaftar.',
             'password.required' => 'Kata sandi wajib diisi.',
+            'password.min' => 'Kata sandi minimal 6 karakter.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
         ]);
 
@@ -106,18 +107,21 @@ class Register extends Component
         // 3. Tentukan zona kampus berdasarkan fakultas mahasiswa
         $prefix = substr($this->nim, 0, 3);
         $campusZone = match ($prefix) {
-            '333' => 'Cilegon',
-            '111', '228', '777' => 'Ciwaru',
+            '333', '331', '332', '334', '335', '336', '337' => 'Cilegon',
+            '111', '112', '228', '777', '771', '772', '773' => 'Ciwaru',
             default => 'Sindangsari',
         };
 
+        $cleanEmail = strtolower(trim($this->email));
+        $cleanNim = trim($this->nim);
+
         // Simpan data user ke database
         $user = User::create([
-            'nim' => $this->nim,
+            'nim' => $cleanNim,
             'campus_name' => $validation['university'] ?? 'Universitas Sultan Ageng Tirtayasa',
             'campus_zone' => $campusZone,
-            'name' => $this->name,
-            'email' => $this->email,
+            'name' => trim($this->name),
+            'email' => $cleanEmail,
             'password' => Hash::make($this->password),
         ]);
 
@@ -128,7 +132,7 @@ class Register extends Component
         session()->flash('status', 'Selamat datang di CampusCycle Untirta, ' . $user->name . '! Akun Anda berhasil dibuat.');
 
         // 5. Arahkan user ke halaman /dashboard
-        $this->redirect('/dashboard', navigate: true);
+        $this->redirect('/dashboard', navigate: false);
     }
 
     public function render()

@@ -32,12 +32,21 @@ class Login extends Component
         // Deteksi apakah kredensial berupa email atau NIM
         $cleanLogin = trim($this->login);
         $isEmail = filter_var($cleanLogin, FILTER_VALIDATE_EMAIL);
-        $credentials = [
-            $isEmail ? 'email' : 'nim' => $cleanLogin,
-            'password' => $this->password,
-        ];
 
-        if (!Auth::attempt($credentials, $this->remember)) {
+        $loginField = $isEmail ? 'email' : 'nim';
+        $loginValue = $isEmail ? strtolower($cleanLogin) : $cleanLogin;
+
+        $attempt = Auth::attempt([$loginField => $loginValue, 'password' => $this->password], $this->remember);
+
+        // Fallback: jika gagal, coba login menggunakan field sebaliknya (antisipasi variasi format input)
+        if (!$attempt) {
+            $attempt = Auth::attempt(['email' => strtolower($cleanLogin), 'password' => $this->password], $this->remember);
+        }
+        if (!$attempt) {
+            $attempt = Auth::attempt(['nim' => $cleanLogin, 'password' => $this->password], $this->remember);
+        }
+
+        if (!$attempt) {
             throw ValidationException::withMessages([
                 'login' => 'Kombinasi akun (NIM/Email dan Kata Sandi) tidak sesuai.',
             ]);
