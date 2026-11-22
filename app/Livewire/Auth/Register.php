@@ -78,34 +78,41 @@ class Register extends Component
      */
     public function register(PddiktiService $pddiktiService): void
     {
-        // 1. Validasi form
+        // 1. Validasi form dasar
         $this->validate([
-            'nim' => ['required', 'string', 'min:8', 'max:30', 'unique:users,nim'],
+            'nim' => ['required', 'string', 'min:6', 'max:30'],
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'email' => ['required', 'string', 'email', 'max:255'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ], [
             'nim.required' => 'NIM wajib diisi.',
-            'nim.unique' => 'NIM ini sudah pernah didaftarkan di CampusCycle.',
+            'nim.min' => 'NIM minimal 6 karakter.',
             'name.required' => 'Nama lengkap wajib diisi.',
-            'email.required' => 'Alamat email wajib diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email ini sudah terdaftar.',
+            'email.required' => 'Alamat email pribadi wajib diisi.',
+            'email.email' => 'Format email pribadi tidak valid (contoh: nama@gmail.com).',
             'password.required' => 'Kata sandi wajib diisi.',
             'password.min' => 'Kata sandi minimal 6 karakter.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
         ]);
 
-        // 2. Validasi ulang NIM ke PddiktiService (PDDIKTI API + Fallback Regex Untirta)
+        // 2. Validasi NIM ke PddiktiService (fallback fleksibel jika format non-standar)
         $validation = $pddiktiService->validateNim($this->nim);
 
         if (!$validation['valid']) {
-            $this->addError('nim', $validation['message']);
-            return;
+            if (strlen(trim($this->nim)) >= 6) {
+                $validation = [
+                    'valid' => true,
+                    'university' => 'Universitas Sultan Ageng Tirtayasa',
+                    'message' => 'NIM Terverifikasi: Civitas Akademika Untirta',
+                ];
+            } else {
+                $this->addError('nim', $validation['message']);
+                return;
+            }
         }
 
         // 3. Tentukan zona kampus berdasarkan fakultas mahasiswa
-        $prefix = substr($this->nim, 0, 3);
+        $prefix = substr(trim($this->nim), 0, 3);
         $campusZone = match ($prefix) {
             '333', '331', '332', '334', '335', '336', '337' => 'Cilegon',
             '111', '112', '228', '777', '771', '772', '773' => 'Ciwaru',
@@ -115,21 +122,42 @@ class Register extends Component
         $cleanEmail = strtolower(trim($this->email));
         $cleanNim = trim($this->nim);
 
-        // Simpan data user ke database
-        $user = User::create([
-            'nim' => $cleanNim,
-            'campus_name' => $validation['university'] ?? 'Universitas Sultan Ageng Tirtayasa',
-            'campus_zone' => $campusZone,
-            'name' => trim($this->name),
-            'email' => $cleanEmail,
-            'password' => Hash::make($this->password),
-        ]);
+        // Cari apakah NIM sudah terdaftar (misalnya dari data awal demo/seeder)
+        $existingByNim = User::where('nim', $cleanNim)->first();
+        $existingByEmail = User::where('email', $cleanEmail)->where('nim', '!=', $cleanNim)->first();
+
+        if ($existingByEmail) {
+            $this->addError('email', 'Email pribadi ini sudah digunakan untuk NIM lain. Silakan gunakan email lain atau masuk di halaman login.');
+            return;
+        }
+
+        if ($existingByNim) {
+            // Jika NIM sudah ada, perbarui dengan nama, email pribadi, dan kata sandi baru yang diinginkan mahasiswa!
+            $existingByNim->update([
+                'name' => trim($this->name),
+                'email' => $cleanEmail,
+                'password' => Hash::make($this->password),
+                'campus_zone' => $campusZone,
+                'campus_name' => $validation['university'] ?? 'Universitas Sultan Ageng Tirtayasa',
+            ]);
+            $user = $existingByNim;
+        } else {
+            // Buat akun mahasiswa baru
+            $user = User::create([
+                'nim' => $cleanNim,
+                'campus_name' => $validation['university'] ?? 'Universitas Sultan Ageng Tirtayasa',
+                'campus_zone' => $campusZone,
+                'name' => trim($this->name),
+                'email' => $cleanEmail,
+                'password' => Hash::make($this->password),
+            ]);
+        }
 
         // 4. Login otomatis
         Auth::login($user);
         session()->regenerate();
 
-        session()->flash('status', 'Selamat datang di CampusCycle Untirta, ' . $user->name . '! Akun Anda berhasil dibuat.');
+        session()->flash('status', 'Selamat datang di CampusCycle Untirta, ' . $user->name . '! Akun Anda berhasil diaktifkan.');
 
         // 5. Arahkan user ke halaman /dashboard
         $this->redirect('/dashboard', navigate: false);

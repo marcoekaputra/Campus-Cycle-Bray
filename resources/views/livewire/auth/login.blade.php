@@ -38,7 +38,7 @@
             <!-- 1. Input Email / NIM -->
             <div>
                 <label for="login" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                    NIM atau Alamat Email <span class="text-rose-500">*</span>
+                    NIM atau Alamat Email Pribadi <span class="text-rose-500">*</span>
                 </label>
                 <div class="relative rounded-xl shadow-xs">
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -52,7 +52,7 @@
                         id="login"
                         wire:model="login"
                         value="{{ old('login') }}"
-                        placeholder="Contoh: 3337240067 atau email"
+                        placeholder="Contoh: 3337240067 atau namaanda@gmail.com"
                         class="block w-full pl-11 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#641E28]/20 focus:border-[#641E28] transition-colors font-medium outline-hidden"
                         required
                         autofocus

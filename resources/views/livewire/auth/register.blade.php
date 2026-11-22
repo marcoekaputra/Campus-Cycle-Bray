@@ -144,10 +144,10 @@
                 @enderror
             </div>
 
-            <!-- 3. Input Email -->
+            <!-- 3. Input Email Pribadi -->
             <div>
                 <label for="email" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                    Email Mahasiswa <span class="text-rose-500">*</span>
+                    Alamat Email Pribadi (Gmail / Yahoo / dsb.) <span class="text-rose-500">*</span>
                 </label>
                 <div class="relative rounded-xl shadow-sm">
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -159,11 +159,12 @@
                         type="email"
                         id="email"
                         wire:model="email"
-                        placeholder="nama@untirta.ac.id atau email aktif"
+                        placeholder="namaanda@gmail.com"
                         class="block w-full pl-11 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-[#641E28] focus:border-[#641E28] transition-colors"
                         required
                     />
                 </div>
+                <p class="mt-1 text-[11px] text-slate-500">Gunakan email pribadi aktif Anda untuk menerima bukti transaksi dan tautan pemulihan kata sandi jika lupa password.</p>
                 @error('email')
                     <p class="mt-1 text-xs text-rose-600 font-medium">{{ $message }}</p>
                 @enderror
@@ -250,8 +251,7 @@
                 <button
                     type="submit"
                     wire:loading.attr="disabled"
-                    @disabled($isNimValid === false)
-                    class="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-black text-white bg-[#641E28] hover:bg-[#4A151D] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-blue-800/20"
+                    class="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-black text-white bg-[#641E28] hover:bg-[#4A151D] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-rose-950/20 cursor-pointer"
                 >
                     <span wire:loading.remove wire:target="register">
                         Daftar Akun Mahasiswa
